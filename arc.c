@@ -1564,6 +1564,19 @@ error builtin_system(struct vector *vargs, atom *result) {
 	else return ERROR_ARGS;
 }
 
+error builtin_pipe_from(struct vector *vargs, atom *result) {
+	long alen = vargs->size;
+	if (alen == 1) {
+		atom a = vargs->data[0];
+		if (a.type != T_STRING) return ERROR_TYPE;
+        FILE *fp = popen(vargs->data[0].value.str->value, "r");
+        if (fp == NULL) return ERROR_FILE;
+        *result = make_input(fp);
+        return ERROR_OK;
+	}
+	else return ERROR_ARGS;
+}
+
 error builtin_eval(struct vector *vargs, atom *result) {
 	if (vargs->size == 1) return macex_eval(vargs->data[0], result);
 	else return ERROR_ARGS;
@@ -2680,6 +2693,7 @@ void arc_init(char *file_path) {
 	env_assign(env, make_sym("string").value.symbol, make_builtin(builtin_string));
 	env_assign(env, make_sym("sym").value.symbol, make_builtin(builtin_sym));
 	env_assign(env, make_sym("system").value.symbol, make_builtin(builtin_system));
+	env_assign(env, make_sym("pipe-from").value.symbol, make_builtin(builtin_pipe_from));
 	env_assign(env, make_sym("eval").value.symbol, make_builtin(builtin_eval));
 	env_assign(env, make_sym("load").value.symbol, make_builtin(builtin_load));
 	env_assign(env, make_sym("int").value.symbol, make_builtin(builtin_int));
